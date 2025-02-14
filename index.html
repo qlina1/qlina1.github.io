@@ -2,95 +2,497 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PGS Group 桌号查询系统</title>
+    <title>PGS桌号查询系统</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 50%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        input[type="text"] {
-            padding: 8px;
-            width: 200px;
-        }
-        button {
-            padding: 8px 16px;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        .search-box { margin-bottom: 20px; }
+        input[type="text"] { width: 300px; padding: 8px; }
+        button { padding: 8px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .results { margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="请输入姓名">
+        <button onclick="searchTable()">查询</button>
+    </div>
+    <div class="results" id="results"></div>
 
-<h1>PGS桌号查询系统</h1>
+    <script>
+        // 数据源
+        const tableData = [
+            // 此处只显示部分数据，完整数据需补充
+            { name: "Christopher王梓硕", table: 1 },
+            { name: "Gabo梁家宝", table: 1 },
+            { name: "Rachel Zeng曾祥燕", table: 1 },
+            { name: "Alice Pang庞莹", table: 1 },
+            { name: "Janice Zeng曾真", table: 1 },
+            { name: "Dale Huang黄小花", table: 1 },
+            { name: "Erin Xia夏晶晶", table: 1 },
+            { name: "Loly Wu吴泽贤", table: 1 },
+            { name: "Jessie Zhang张燕", table: 1 },
+            { name: "Beverly Zhang张冰玲", table: 1 },
+            { name: "Ms Elsa Chen", table: 2 },
+            { name: "Mr Jerry Zhang", table: 2 },
+            { name: "Mr Nick Li", table: 2 },
+            { name: "Mr Kevin Li", table: 2 },
+            { name: "Sarah官素素", table: 2 },
+            { name: "Abby Ou欧文静", table: 2 },
+            { name: "Ugo Luo罗艳", table: 2 },
+            { name: "Maniya Zhang张晖", table: 2 },
+            { name: "Helmut", table: 2 },
+            { name: "Hemut Wife", table: 2 },
+            { name: "Mr Raymond - Manager", table: 3 },
+            { name: "Mr Charlie - G.M.", table: 3 },
+            { name: "Mr Kelvin (Latin)", table: 3 },
+            { name: "Mr Tony Li", table: 3 },
+            { name: "Mr Marco Ma", table: 3 },
+            { name: "Marco Wai", table: 3 },
+            { name: "Connie廖晓芳", table: 3 },
+            { name: "Kitty Zhao赵倩文", table: 3 },
+            { name: "Katherine Zhong钟园", table: 3 },
+            { name: "Tak Chu", table: 3 },
+            { name: "Mr Andy Co Wong", table: 4 },
+            { name: "Mr Ben Tai", table: 4 },
+            { name: "Vanessa Wang王丹", table: 4 },
+            { name: "Amber Yi易艳", table: 4 },
+            { name: "Eugene Xu许静婷", table: 4 },
+            { name: "Jelley Yang杨杰利", table: 4 },
+            { name: "Sylvia Tian田永飞", table: 4 },
+            { name: "Adela Zheng郑瑜婷", table: 4 },
+            { name: "Marina Ma马佳玲", table: 4 },
+            { name: "Angelina Liu刘己凤", table: 4 },
+            { name: "Kei Ng吳鴻基", table: 5 },
+            { name: "Yip Hoi Wai葉凱威", table: 5 },
+            { name: "Richard Cheung張熾新", table: 5 },
+            { name: "Ki Lee李家奇", table: 5 },
+            { name: "Tony Fong方任雄", table: 5 },
+            { name: "Anna Lui呂安娜", table: 5 },
+            { name: "Iris Yu余靜芳", table: 5 },
+            { name: "Ilim Chu朱雪勤", table: 5 },
+            { name: "Tammy Ho何婉萍", table: 5 },
+            { name: "Benny Lau劉鈞寶", table: 5 },
+            { name: "Nara Chen陈仕娜", table: 6 },
+            { name: "Sunny Chen陈利", table: 6 },
+            { name: "Yoga Xu许瑜佳", table: 6 },
+            { name: "Berry Wu吴贝煜", table: 6 },
+            { name: "Ella Zhuo卓诗敏", table: 6 },
+            { name: "Bessie Dai戴碧芯", table: 6 },
+            { name: "Simone Chen陈思苗", table: 6 },
+            { name: "CoCo Yuan袁芬", table: 6 },
+            { name: "David Xie谢毅", table: 6 },
+            { name: "Kevin Li李俊辉", table: 6 },
+            { name: "Amy Chow周佩儀", table: 7 },
+            { name: "Rebecca Kam甘美萍", table: 7 },
+            { name: "Shirley Hung孔雪明", table: 7 },
+            { name: "Jennifer Sun孫慧凌", table: 7 },
+            { name: "Ng Lin Hou吳蓮好", table: 7 },
+            { name: "Iris Lai黎淑文", table: 7 },
+            { name: "Huang Ka Lung黃嘉龍", table: 7 },
+            { name: "Kwong Mun Chung鄜敏聰", table: 7 },
+            { name: "Joe Lam林 啟祖", table: 7 },
+            { name: "Keith Chan陳振聲", table: 7 },
+            { name: "Mr Patrick Ng", table: 8 },
+            { name: "Mr Martin Pang", table: 8 },
+            { name: "Mr Enson Zheng", table: 8 },
+            { name: "Daniel Yeung杨家宝", table: 8 },
+            { name: "Ellen Xiao肖晓珊", table: 8 },
+            { name: "Zoe Zhou周璇卿", table: 8 },
+            { name: "Zita Cai蔡裕", table: 8 },
+            { name: "Kelly Huang黄嘉丽", table: 8 },
+            { name: "Dorcas Yang杨君", table: 8 },
+            { name: "Keelin Wang王健玲", table: 8 },
+            { name: "Mr Frankie (Europe)", table: 9 },
+            { name: "Ms Flora LV", table: 9 },
+            { name: "Ms. Nina Luo", table: 9 },
+            { name: "Ms Sabrina LN", table: 9 },
+            { name: "Tinley Huang黄婷婷", table: 9 },
+            { name: "Yanet Chen陈韵", table: 9 },
+            { name: "Vella Zhan詹妍冬", table: 9 },
+            { name: "Carol Chen陈嘉慧", table: 9 },
+            { name: "Peggy Zhou周冬伸", table: 9 },
+            { name: "Laura Liu刘晓珊", table: 9 },
+            { name: "Fion Chan陳惠芳", table: 10 },
+            { name: "Echo Cheung張詩韻", table: 10 },
+            { name: "Frankie Wong黃錦喜", table: 10 },
+            { name: "Ivy Chau周淑儀", table: 10 },
+            { name: "Tiffany Man萬佩蓉", table: 10 },
+            { name: "zhangxinglong张兴隆", table: 10 },
+            { name: "William卢永坚", table: 10 },
+            { name: "Thames吴泽彪", table: 10 },
+            { name: "zyra周咏", table: 10 },
+            { name: "Hinoki张伟倩", table: 10 },
+            { name: "Rita Xiong熊茜", table: 11 },
+            { name: "Stella Zheng郑倩", table: 11 },
+            { name: "Debby Liu刘金珠", table: 11 },
+            { name: "Susie Zhang张颖", table: 11 },
+            { name: "Chris Xu许秀梅", table: 11 },
+            { name: "Cassie Huang黄丹", table: 11 },
+            { name: "Amy Chen陈丽香", table: 11 },
+            { name: "Eva Liu刘新萍", table: 11 },
+            { name: "Rocky Kong孔令超", table: 11 },
+            { name: "Jim张艳涛", table: 11 },
+            { name: "Mr Randoph Zhao", table: 12 },
+            { name: "Ms Lily", table: 12 },
+            { name: "Ms Sherily", table: 12 },
+            { name: "Claudia Wu巫秋喜", table: 12 },
+            { name: "Albert He何钦铭", table: 12 },
+            { name: "Cinda Luo罗承碧", table: 12 },
+            { name: "Betty Yin尹婷", table: 12 },
+            { name: "Jolin Zhou周宁", table: 12 },
+            { name: "Ms. Ellen Yu", table: 13 },
+            { name: "Mr Tommy Tan", table: 13 },
+            { name: "Mr Rex Tsoi", table: 13 },
+            { name: "Mr. Larry Chan", table: 13 },
+            { name: "Ms Ice Chan", table: 13 },
+            { name: "Angel Wang王晓蕾", table: 13 },
+            { name: "Amanda Song宋小秋", table: 13 },
+            { name: "Yan Liao廖梓茵", table: 13 },
+            { name: "Emilie Zhang张盼盼", table: 13 },
+            { name: "Danny Chan陳富驊", table: 14 },
+            { name: "Michael Xue薛凯杰", table: 14 },
+            { name: "Fanny Li李慧岭", table: 14 },
+            { name: "Jing Mao毛选静", table: 14 },
+            { name: "Carrie Xiao肖羽彤", table: 14 },
+            { name: "Jennica Wei魏静", table: 14 },
+            { name: "Yoyo Luo罗雪兰", table: 14 },
+            { name: "Tobey Zhu朱惠婷", table: 14 },
+            { name: "Layla Yin殷芷嫣", table: 14 },
+            { name: "Laura Zhang张晓龙", table: 14 },
+            { name: "Frank岳怀平", table: 15 },
+            { name: "carly朱丽敏", table: 15 },
+            { name: "Lily石莉莉", table: 15 },
+            { name: "Alice 刘羽彤", table: 15 },
+            { name: "Miranda郭志莲", table: 15 },
+            { name: "haley林颖琦", table: 15 },
+            { name: "Yvonne容妍", table: 15 },
+            { name: "Alex李穗生", table: 15 },
+            { name: "Joe吴建鸿", table: 15 },
+            { name: "Jack陈康潮", table: 15 },
+            { name: "Dan吴小丹", table: 15 },
+            { name: "Mark Yao姚科妙", table: 16 },
+            { name: "Laidy Shi史侨姿", table: 16 },
+            { name: "Amanda Xu许芳", table: 16 },
+            { name: "Ivy Lai赖海燕", table: 16 },
+            { name: "Lala Kong孔间贞", table: 16 },
+            { name: "Hilde Zhuang庄曼菁", table: 16 },
+            { name: "Annie Qian钱鑫", table: 16 },
+            { name: "Kate Xiao肖丽萍", table: 16 },
+            { name: "Elena Li李洁", table: 16 },
+            { name: "Skyler Ling凌静敏", table: 16 },
+            { name: "Michelle Yang杨虹", table: 17 },
+            { name: "Apple Liu刘苹", table: 17 },
+            { name: "Vivi Liu刘雯", table: 17 },
+            { name: "段先生 深圳市科伦特物流有限公司", table: 17 },
+            { name: "王先生  深圳市圳翔达物流有限公司", table: 17 },
+            { name: "王先生同事深圳市圳翔达物流有限公司", table: 17 },
+            { name: "邹小姐  深圳市顺翌达物流有限公司", table: 17 },
+            { name: "胡先生 深圳市星誉报关有限公司", table: 17 },
+            { name: "Alvin Li李志鹏", table: 17 },
+            { name: "Felix Yuan元康涛", table: 17 },
+            { name: "James Lv吕志国", table: 18 },
+            { name: "Vickie Guo郭书琴", table: 18 },
+            { name: "Lene Zhang张婉玲", table: 18 },
+            { name: "夏总宁波克运捷运", table: 18 },
+            { name: "董总上海灏泽供应链管理有限公司", table: 18 },
+            { name: "Raymond Ding丁晓峰", table: 18 },
+            { name: "Sherry Guo郭春燕", table: 18 },
+            { name: "Jason Yan严志超", table: 18 },
+            { name: "Jack Xu徐彪", table: 18 },
+            { name: "Jennifer Fu付秋红", table: 18 },
+            { name: "Anya Zeng曾馨漪", table: 19 },
+            { name: "Nora Lu卢嘉婷", table: 19 },
+            { name: "Mary Yin尹杨倩", table: 19 },
+            { name: "Ms  Cynthia", table: 19 },
+            { name: "Josiah Liu刘观军", table: 19 },
+            { name: "Jade Ding丁紫玉", table: 19 },
+            { name: "Gloria Peng彭晓晖", table: 19 },
+            { name: "Vivian Deng邓丽娟", table: 19 },
+            { name: "Julia  Chen陈兴华", table: 19 },
+            { name: "Shirley Wu吴欣兰", table: 19 },
+            { name: "David Xu许剑明", table: 21 },
+            { name: "Cherry Huang黄蕾", table: 21 },
+            { name: "Tracy Wang王翠", table: 21 },
+            { name: "Carmen Xiao肖雯", table: 21 },
+            { name: "Emily Chen陈燕珊", table: 21 },
+            { name: "Katie Qin秦娴", table: 21 },
+            { name: "Lulu Meng孟晓露", table: 21 },
+            { name: "Lorna Ru褥映言", table: 21 },
+            { name: "Bruce Lin林健泓", table: 21 },
+            { name: "Lana甘红娥", table: 23 },
+            { name: "Yanny钟燕妮", table: 23 },
+            { name: "Lulu卢丽萍", table: 23 },
+            { name: "Terry钟伟雄", table: 23 },
+            { name: "Jojo朱祁", table: 23 },
+            { name: "Sandy林晓漩", table: 23 },
+            { name: "Devin张东奎", table: 23 },
+            { name: "Cindy陈宇平", table: 23 },
+            { name: "Anne周玲", table: 23 },
+            { name: "Jesse纪昌胜", table: 23 },
+            { name: "Jessie Wang王夕语", table: 24 },
+            { name: "William Zeng曾林鑫", table: 24 },
+            { name: "Aibo Lai赖国强", table: 24 },
+            { name: "Ethan Liu刘德强", table: 24 },
+            { name: "Uri Li李俊龙", table: 24 },
+            { name: "young hu胡杨森", table: 24 },
+            { name: "Daniel yu余瑞", table: 24 },
+            { name: "Joe yang杨杰", table: 24 },
+            { name: "Alin Liu刘阿林", table: 24 },
+            { name: "Bella Ruan阮奕婷", table: 24 },
+            { name: "Kim Gui桂佳佳", table: 25 },
+            { name: "kitty Liu刘艳", table: 25 },
+            { name: "Lily Li李丽", table: 25 },
+            { name: "Jun Zeng曾俊", table: 25 },
+            { name: "Bo Yang杨波", table: 25 },
+            { name: "Min Qing Zhang张敏清", table: 25 },
+            { name: "Wing Qian钱永玉", table: 25 },
+            { name: "Zoe Zou邹小青", table: 25 },
+            { name: "Ivy Zeng曾欣", table: 25 },
+            { name: "Dong Ping Zhang张东平", table: 25 },
+            { name: "Mango Han韩灿", table: 26 },
+            { name: "Chocolate  Zhu朱俊烨", table: 26 },
+            { name: "Ann An安彩霞", table: 26 },
+            { name: "Tim Zheng郑远浩", table: 26 },
+            { name: "Link Ruan阮洋", table: 26 },
+            { name: "Janny  Mei梅锦琳", table: 26 },
+            { name: "Mandy Tang唐静", table: 26 },
+            { name: "Kiki Ding丁玲", table: 26 },
+            { name: "Mars Ye叶挺", table: 26 },
+            { name: "Violin Wang王雅玲", table: 26 },
+            { name: "David Qin秦伟丰", table: 26 },
+            { name: "Echo聂同", table: 29 },
+            { name: "Aileen陈常勤", table: 29 },
+            { name: "Micky邹漫妥", table: 29 },
+            { name: "Daisy毛元园", table: 29 },
+            { name: "Katy梁凯荻", table: 29 },
+            { name: "Merry刘乃昕", table: 29 },
+            { name: "Summer陈洁梅", table: 29 },
+            { name: "Sophie黄慰华", table: 29 },
+            { name: "Leyla罗莹", table: 29 },
+            { name: "Andrew敖卓俊", table: 29 },
+            { name: "馮婉儀Kalina Fung", table: 30 },
+            { name: "吳建輝Billy Ng", table: 30 },
+            { name: "趙耀祖 Chiu Yiu Cho", table: 30 },
+            { name: "馮錦華Loretta Fung", table: 30 },
+            { name: "曾志遠Tsang Chi Yuen", table: 30 },
+            { name: "羅浩賢Law Ho Yin", table: 30 },
+            { name: "李詩華Lee Sze Wah", table: 30 },
+            { name: "黃家輝Wong Ka Fai", table: 30 },
+            { name: "孫流東Gary Suen", table: 30 },
+            { name: "Chung", table: 30 },
+            { name: "Tina Pu蒲芳", table: 31 },
+            { name: "Nick Zhang张开裕", table: 31 },
+            { name: "Jessica Qiu邱俊怡", table: 31 },
+            { name: "Riky  Ou欧笑梅", table: 31 },
+            { name: "Ella  Chen陈冬丽", table: 31 },
+            { name: "Jaelyn  Zhang张建銮", table: 31 },
+            { name: "Joy  Mei梅果果", table: 31 },
+            { name: "Sue  Zhong钟素华", table: 31 },
+            { name: "Zona  Lin林舜红", table: 31 },
+            { name: "Elaine  Li李华艳", table: 31 },
+            { name: "Aaron  Chen陈新华", table: 31 },
+            { name: "Tony Zhuo卓超", table: 32 },
+            { name: "Wendy Fang方俊", table: 32 },
+            { name: "Sugar  Tang唐小灵", table: 32 },
+            { name: "Yuka  Lin林玉霞", table: 32 },
+            { name: "Rayan Su苏睿", table: 32 },
+            { name: "Yumi Zheng郑玉美", table: 32 },
+            { name: "Ray Chen陈鸿辉", table: 32 },
+            { name: "Winnie Wen温秋芬", table: 32 },
+            { name: "Una Peng彭谦蓉", table: 32 },
+            { name: "Mia Zhang张圣南", table: 32 },
+            { name: "Eliza Li李静", table: 32 },
+            { name: "Grace jiang蒋欢", table: 36 },
+            { name: "Nico Xu许昆", table: 36 },
+            { name: "Niki Yang杨玉麒", table: 36 },
+            { name: "Mia Ou欧秋虹", table: 36 },
+            { name: "Liya Li黎月清", table: 36 },
+            { name: "Yan xiang向小燕", table: 36 },
+            { name: "Shyman xiong熊亮亮", table: 36 },
+            { name: "Viya xie谢凤华", table: 36 },
+            { name: "Hardy lai赖鹏", table: 36 },
+            { name: "Milo wang王长晴", table: 36 },
+            { name: "katy yang杨菊", table: 36 },
+            { name: "Mavis  Wu吴晓丹", table: 37 },
+            { name: "May  Chen陈海媚", table: 37 },
+            { name: "Scott Li李积武", table: 37 },
+            { name: "Kain Qiu 邱玲玲", table: 37 },
+            { name: "Edward Wu吴桂贤", table: 37 },
+            { name: "Julianna Ye叶秋联", table: 37 },
+            { name: "Martina Xie谢佳丽", table: 37 },
+            { name: "Daisy Xie谢计祯", table: 37 },
+            { name: "Kira Bi毕婷婷", table: 37 },
+            { name: "Aries Liu刘嘉秀", table: 37 },
+            { name: "Kathleen Wang王会", table: 37 },
+            { name: "Danny Chen陈慧", table: 38 },
+            { name: "Candy Wu吴美英", table: 38 },
+            { name: "Merry  Zhan占巧玲", table: 38 },
+            { name: "Yoki Xie谢凤燕", table: 38 },
+            { name: "Jen Zhao赵长珍", table: 38 },
+            { name: "Ada  Wang王梅", table: 38 },
+            { name: "Lynn  Xiao肖娅玲", table: 38 },
+            { name: "Annie Liu刘喜玲", table: 38 },
+            { name: "Ryden  Chen陈春枫", table: 38 },
+            { name: "Yan Liang梁燕秋", table: 38 },
+            { name: "Summer Liu刘柳红", table: 38 },
+            { name: "Gang Long Xiao肖港龙", table: 41 },
+            { name: "Gui Chun Yang杨贵春", table: 41 },
+            { name: "Lan Jun Xiao肖兰军", table: 41 },
+            { name: "Vivian Liao廖桂珍", table: 41 },
+            { name: "Dong Lin Xiao肖冬林", table: 41 },
+            { name: "Elin Lu陆奕林", table: 41 },
+            { name: "Ina Xiao肖艳云", table: 41 },
+            { name: "Shan Zhang张珊", table: 41 },
+            { name: "Ri Biao Long龙日标", table: 41 },
+            { name: "Cheng Nan Cai蔡成南", table: 41 },
+            { name: "Cun  Qiao Wei韦存桥", table: 42 },
+            { name: "Jun Qi Zhai翟俊奇", table: 42 },
+            { name: "Hui Yin 尹辉", table: 42 },
+            { name: "Yu Lin Yang杨玉林", table: 42 },
+            { name: "Yue Jiao Wang王月娇", table: 42 },
+            { name: "Chang Feng Fan范长锋", table: 42 },
+            { name: "Zhi Hui Wu吴智慧", table: 42 },
+            { name: "Tony Chen陈宜华", table: 42 },
+            { name: "Wede lei雷豪", table: 42 },
+            { name: "Nikki chen陈静", table: 43 },
+            { name: "Patrick Zheng郑粤", table: 43 },
+            { name: "Irene Li李香婷", table: 43 },
+            { name: "Nina Xu徐思怡", table: 43 },
+            { name: "Emma Wei韦方玩", table: 43 },
+            { name: "Wander He何婉茹", table: 43 },
+            { name: "Sunday Lan蓝敏", table: 43 },
+            { name: "Isla Xiao肖晓平", table: 43 },
+            { name: "Dennis Cai蔡东儒", table: 43 },
+            { name: "Nani He何艳玲", table: 43 },
+            { name: "James庄建杰", table: 30 },
+            { name: "Joanna郑智文", table: 30 },
+            { name: "Amy马禧婷", table: 30 },
+            { name: "May付艳红", table: 30 },
+            { name: "Janisa张香习", table: 30 },
+            { name: "Evelyn黄苑芬", table: 30 },
+            { name: "Hattie明海霞", table: 30 },
+            { name: "Anita黄幸平", table: 30 },
+            { name: "Janet陈紫愉", table: 30 },
+            { name: "Sylvia Chen陈惠君", table: 20 },
+            { name: "Daphne Xie谢茵丽", table: 20 },
+            { name: "Meiko Wang王钰涓", table: 20 },
+            { name: "Kendall Xu许越华", table: 20 },
+            { name: "Elah Zhuang庄以拉", table: 20 },
+            { name: "Eileen Hu胡爱淋", table: 20 },
+            { name: "Sugers Zhou周晓洁", table: 20 },
+            { name: "Faye Li李芬芬", table: 20 },
+            { name: "Erick Ou区俊杰", table: 20 },
+            { name: "Kiki Liao廖子艳", table: 20 },
+            { name: "Cynthia Yang杨丹丹", table: 39 },
+            { name: "Allen Yu余雪珊", table: 39 },
+            { name: "JoJo He何秀玲", table: 39 },
+            { name: "Queen Huang黄利", table: 39 },
+            { name: "Crayon Guo郭培莹", table: 39 },
+            { name: "Winnie Zhang张咏欣", table: 39 },
+            { name: "Janet Chen陈佳", table: 39 },
+            { name: "Heidi Li李丹君", table: 39 },
+            { name: "Bella Fu傅仕兰", table: 39 },
+            { name: "Yulia Zhan詹映月", table: 39 },
+            { name: "Bye Lee李胜龙", table: 22 },
+            { name: "Kayla Chen陈俐君", table: 22 },
+            { name: "Melody Fan范丽云", table: 22 },
+            { name: "Gigi Huang黄巧菊", table: 22 },
+            { name: "Lisa Li李双双", table: 22 },
+            { name: "Vicky Yao姚伟燕", table: 22 },
+            { name: "Germaine Li李卓媚", table: 22 },
+            { name: "Lilo Luo罗嘉晞", table: 22 },
+            { name: "Cora Cai蔡丽苹", table: 22 },
+            { name: "Carrie Wu吴艳芝", table: 22 },
+            { name: "Giselle Li李洁", table: 40 },
+            { name: "Claire Bi毕雪", table: 40 },
+            { name: "Casey Huang黄达齐", table: 40 },
+            { name: "Miya Liu刘莹", table: 40 },
+            { name: "Tina Wang王扬妮", table: 40 },
+            { name: "Dora Liu刘赛萍", table: 40 },
+            { name: "Rena Tan谭陈芳", table: 40 },
+            { name: "Doris Gao高素芳", table: 40 },
+            { name: "Judy Zhu朱红波", table: 40 },
+            { name: "Valentine Zhu朱芳莹", table: 40 },
+            { name: "Aileen Lu卢尔丹", table: 33 },
+            { name: "Kelly Li李海莹", table: 33 },
+            { name: "Grace Su苏林", table: 33 },
+            { name: "Nico Zhang张春慧", table: 33 },
+            { name: "Luna Lin林沁彤", table: 33 },
+            { name: "Lena Hu胡欣", table: 33 },
+            { name: "Gianna Zhong钟梦芝", table: 33 },
+            { name: "Hedy Zhong钟奕莲", table: 33 },
+            { name: "Angel zhang章小庆", table: 33 },
+            { name: "Sisco fu付文龙", table: 33 },
+            { name: "Ellen Xue薛英", table: 34 },
+            { name: "Ruby Shu舒小芳", table: 34 },
+            { name: "Gina Chen陈丽敏", table: 34 },
+            { name: "Shirley Xie谢冬丽", table: 34 },
+            { name: "Nancy Huang黄卉", table: 34 },
+            { name: "Momo Peng彭家莉", table: 34 },
+            { name: "Jaling Luo罗佳玲", table: 34 },
+            { name: "Yoyo Min闵星星", table: 34 },
+            { name: "Freda Fang方柳燕", table: 34 },
+            { name: "Ye Ye叶芸菲", table: 34 },
+            { name: "Mally Wang王美芳", table: 44 },
+            { name: "Eva Lai赖萍梅", table: 44 },
+            { name: "Cathy Wang王双", table: 44 },
+            { name: "Moon Wei韦彩菊", table: 44 },
+            { name: "Candice Xu徐一灵", table: 44 },
+            { name: "Rod Lin林祥汇", table: 44 },
+            { name: "Leon Chen陈子彭", table: 44 },
+            { name: "Zoe Liu刘文娟", table: 44 },
+            { name: "Joean Liu刘籽莹", table: 44 },
+            { name: "Helen Wang王慧", table: 44 },
+            { name: "Stephen Su苏秋胜", table: 35 },
+            { name: "Bibi Liu刘欣", table: 35 },
+            { name: "Fenny Qi漆小灵", table: 35 },
+            { name: "Carol Chen陈映樘", table: 35 },
+            { name: "Ben Shen沈国松", table: 35 },
+            { name: "Eason Chen陈昱升", table: 35 },
+            { name: "Adam Zhao赵初阳", table: 35 },
+            { name: "Alice Feng冯静", table: 35 },
+            { name: "Demi Huang黄颖", table: 35 },
+            { name: "Jason Zhan詹大路", table: 35 },
+            { name: "Colin Chen陈琛林", table: 45 },
+            { name: "Lucy Zhang张媛媛", table: 45 },
+            { name: "Crystal Ye叶柳珍", table: 45 },
+            { name: "Jim Ding丁志清", table: 45 },
+            { name: "Travis Zhang张鹏程", table: 45 },
+            { name: "Alan Zhong钟雅伦", table: 45 },
+            { name: "Susan Zhang张小英", table: 45 },
+            { name: "ken Hu胡肯登", table: 45 },
+            { name: "Summer Tan谭有", table: 45 },
+            { name: "Ethan Wu吴桂钦", table: 45 }
+        ];
 
-<input type="text" id="searchInput" placeholder="输入名字查询桌号">
-<button onclick="searchTable()">查询</button>
+        function searchTable() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const results = tableData.filter(item => 
+                item.name.toLowerCase().includes(input)
+            );
 
-<table id="dataTable">
-    <thead>
-        <tr>
-            <th>Name-名字</th>
-            <th>Table Number桌号</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr><td>Nara Chen陈仕娜</td><td>1</td></tr>
-        <tr><td>Sunny Chen陈利</td><td>1</td></tr>
-        <tr><td>Yoga Xu许瑜佳</td><td>1</td></tr>
-        <tr><td>Berry Wu吴贝煜</td><td>1</td></tr>
-        <tr><td>Ella Zhuo卓诗敏</td><td>1</td></tr>
-        <tr><td>Bessie Dai戴碧芯</td><td>1</td></tr>
-        <tr><td>Simone Chen陈思苗</td><td>1</td></tr>
-        <tr><td>CoCo Yuan袁芬</td><td>1</td></tr>
-        <tr><td>David Xie谢毅</td><td>1</td></tr>
-        <tr><td>Kevin Li李俊辉</td><td>1</td></tr>
-        <tr><td>Christopher王梓硕</td><td>2</td></tr>
-        <tr><td>Gabo梁家宝</td><td>2</td></tr>
-        <tr><td>Rachel Zeng曾祥燕</td><td>2</td></tr>
-        <tr><td>Alice Pang庞莹</td><td>2</td></tr>
-        <tr><td>Janice Zeng曾真</td><td>2</td></tr>
-        <tr><td>Dale Huang黄小花</td><td>2</td></tr>
-        <tr><td>Erin Xia夏晶晶</td><td>2</td></tr>
-        <tr><td>Loly Wu吴泽贤</td><td>2</td></tr>
-        <tr><td>Jessie Zhang张燕</td><td>2</td></tr>
-        <tr><td>Beverly Zhang张冰玲</td><td>2</td></tr>
-    </tbody>
-</table>
-
-<script>
-    function searchTable() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("searchInput");
-        filter = input.value.toUpperCase();
-        table = document.getElementById("dataTable");
-        tr = table.getElementsByTagName("tr");
-
-        for (i = 1; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[0];
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
+            let html = '';
+            if (results.length > 0) {
+                html = `<table>
+                    <tr><th>姓名</th><th>桌号</th></tr>
+                    ${results.map(item => 
+                        `<tr><td>${item.name}</td><td>${item.table}</td></tr>`
+                    ).join('')}
+                </table>`;
+            } else {
+                html = "<p>未找到匹配的结果</p>";
             }
+            document.getElementById('results').innerHTML = html;
         }
-    }
-</script>
 
+        // 支持回车键查询
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchTable();
+        });
+    </script>
 </body>
 </html>
