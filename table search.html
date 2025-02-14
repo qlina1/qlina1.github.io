@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGS Group 桌号查询系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>PGS桌号查询系统</h1>
+
+<input type="text" id="searchInput" placeholder="输入名字查询桌号">
+<button onclick="searchTable()">查询</button>
+
+<table id="dataTable">
+    <thead>
+        <tr>
+            <th>Name-名字</th>
+            <th>Table Number桌号</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Nara Chen陈仕娜</td><td>1</td></tr>
+        <tr><td>Sunny Chen陈利</td><td>1</td></tr>
+        <tr><td>Yoga Xu许瑜佳</td><td>1</td></tr>
+        <tr><td>Berry Wu吴贝煜</td><td>1</td></tr>
+        <tr><td>Ella Zhuo卓诗敏</td><td>1</td></tr>
+        <tr><td>Bessie Dai戴碧芯</td><td>1</td></tr>
+        <tr><td>Simone Chen陈思苗</td><td>1</td></tr>
+        <tr><td>CoCo Yuan袁芬</td><td>1</td></tr>
+        <tr><td>David Xie谢毅</td><td>1</td></tr>
+        <tr><td>Kevin Li李俊辉</td><td>1</td></tr>
+        <tr><td>Christopher王梓硕</td><td>2</td></tr>
+        <tr><td>Gabo梁家宝</td><td>2</td></tr>
+        <tr><td>Rachel Zeng曾祥燕</td><td>2</td></tr>
+        <tr><td>Alice Pang庞莹</td><td>2</td></tr>
+        <tr><td>Janice Zeng曾真</td><td>2</td></tr>
+        <tr><td>Dale Huang黄小花</td><td>2</td></tr>
+        <tr><td>Erin Xia夏晶晶</td><td>2</td></tr>
+        <tr><td>Loly Wu吴泽贤</td><td>2</td></tr>
+        <tr><td>Jessie Zhang张燕</td><td>2</td></tr>
+        <tr><td>Beverly Zhang张冰玲</td><td>2</td></tr>
+    </tbody>
+</table>
+
+<script>
+    function searchTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("dataTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 1; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
